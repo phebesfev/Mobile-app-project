@@ -20,7 +20,6 @@ class AppTheme {
         primary: primaryColor,
         secondary: secondaryColor,
         surface: surfaceColor,
-        background: backgroundColor,
         error: accentColor,
       ),
       
@@ -86,6 +85,7 @@ class AppTheme {
       ),
 
       // Cards
+      /*
       cardTheme: CardTheme(
         color: surfaceColor,
         elevation: 2,
@@ -94,6 +94,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(16),
         ),
       ),
+      */
       
       // App Bar
       appBarTheme: const AppBarTheme(

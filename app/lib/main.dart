@@ -19,4 +19,3 @@ class QuickScanApp extends StatelessWidget {
     );
   }
 }
-
