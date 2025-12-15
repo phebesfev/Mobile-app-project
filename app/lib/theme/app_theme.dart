@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 
 class AppTheme {
   // 1. Define the Color Palette
@@ -22,28 +22,25 @@ class AppTheme {
         surface: surfaceColor,
         error: accentColor,
       ),
-      
-      // 3. Typography (Google Fonts)
-      // "Poppins" is very popular for modern apps (clean, geometric)
-      textTheme: GoogleFonts.poppinsTextTheme().copyWith(
-        displayLarge: GoogleFonts.poppins(
+
+      // 3. Typography (Default or custom font family)
+      fontFamily: 'Poppins', // Or your preferred font family, must be available on all platforms
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: Colors.black87,
         ),
-        titleLarge: GoogleFonts.poppins(
+        titleLarge: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: Colors.black87,
         ),
-        bodyMedium: GoogleFonts.poppins(
-          fontSize: 14,
-          color: Colors.black54,
-        ),
+        bodyMedium: TextStyle(fontSize: 14, color: Colors.black54),
       ),
 
       // 4. Component Styling (The "Professional Polish")
-      
+
       // Buttons
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -54,7 +51,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12), // Soft rounded corners
           ),
-          textStyle: GoogleFonts.poppins(
+          textStyle: const TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 16,
           ),
@@ -65,7 +62,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.grey[100],
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none, // No border when inactive (clean look)
@@ -95,7 +95,7 @@ class AppTheme {
         ),
       ),
       */
-      
+
       // App Bar
       appBarTheme: const AppBarTheme(
         backgroundColor: surfaceColor,
