@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'signup_screen.dart';
+import '../scan/edit.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,9 +25,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(
+      Navigator.pushReplacement(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Processing Login...')));
+        MaterialPageRoute(builder: (context) => const EditDocumentPage()),
+      );
     }
   }
 
@@ -52,21 +54,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           // Title and subtitle
                           Text(
                             'Log in',
-                            style: const TextStyle(
-                              fontSize: 35,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                              // fontFamily is inherited from theme
-                            ),
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 35,
+                                ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Enter your details to continue',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: Colors.grey, fontSize: 16),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 32),
@@ -75,11 +74,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             alignment: Alignment.centerLeft,
                             child: Text(
                               'Enter your e- mail',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w500),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -106,11 +102,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             alignment: Alignment.centerLeft,
                             child: Text(
                               'Enter your password',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(fontWeight: FontWeight.w500),
                             ),
                           ),
                           const SizedBox(height: 8),
