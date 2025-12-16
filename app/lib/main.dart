@@ -13,9 +13,9 @@ class QuickScanApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Quick Scan',
-      debugShowCheckedModeBanner: false, // Removes the "Debug" banner
-      theme: AppTheme.lightTheme, // Apply our custom professional theme
-      home: const LoginScreen(), // Start at Login for now
+      debugShowCheckedModeBanner: false, // 
+      theme: AppTheme.lightTheme, // 
+      home: const LoginScreen(), 
     );
   }
 }
