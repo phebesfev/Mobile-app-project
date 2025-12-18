@@ -178,20 +178,31 @@ class _EditImagePageState extends State<EditImagePage> {
                       // TODO: Save/confirm changes
                       Navigator.pop(context);
                     },
-                    icon: Icon(Icons.save, color: Theme.of(context).colorScheme.primary, size: 26),
+                    icon: Icon(
+                      Icons.save,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 26,
+                    ),
                     label: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Text('Save Changes',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                          letterSpacing: 0.2,
-                        ),
+                      child: Text(
+                        'Save Changes',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                              letterSpacing: 0.2,
+                            ),
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       backgroundColor: Theme.of(context).colorScheme.surface,
                       shadowColor: Colors.black.withOpacity(0.08),
                       elevation: 2,
@@ -205,20 +216,31 @@ class _EditImagePageState extends State<EditImagePage> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    icon: Icon(Icons.close, color: Theme.of(context).colorScheme.primary, size: 26),
+                    icon: Icon(
+                      Icons.close,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 26,
+                    ),
                     label: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Text('Cancel',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                          letterSpacing: 0.2,
-                        ),
+                      child: Text(
+                        'Cancel',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                              letterSpacing: 0.2,
+                            ),
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       backgroundColor: Theme.of(context).colorScheme.surface,
                       shadowColor: Colors.black.withOpacity(0.08),
                       elevation: 2,
