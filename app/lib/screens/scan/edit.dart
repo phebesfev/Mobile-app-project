@@ -29,7 +29,6 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image preview placeholder and Edit Image button (restored)
             Center(
               child: Column(
                 children: [
@@ -41,7 +40,9 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(22),
                       border: Border.all(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.13),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.13),
                         width: 2,
                       ),
                       boxShadow: [
@@ -56,7 +57,9 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                       child: Icon(
                         Icons.insert_drive_file,
                         size: 100,
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.22),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.22),
                       ),
                     ),
                   ),
@@ -72,20 +75,31 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                           ),
                         );
                       },
-                      icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary, size: 26),
+                      icon: Icon(
+                        Icons.edit,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 26,
+                      ),
                       label: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Text('Edit Image',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                            letterSpacing: 0.2,
-                          ),
+                        child: Text(
+                          'Edit Image',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.primary,
+                                letterSpacing: 0.2,
+                              ),
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        side: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
+                          width: 2,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         backgroundColor: Theme.of(context).colorScheme.surface,
                         shadowColor: Colors.black.withOpacity(0.08),
                         elevation: 2,
@@ -105,7 +119,11 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.08)),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withOpacity(0.08),
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.06),
@@ -119,9 +137,16 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
+                      Icon(
+                        Icons.info_outline,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                       const SizedBox(width: 8),
-                      Text('Document Details', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                      Text(
+                        'Document Details',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 18),
@@ -130,11 +155,15 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                       labelText: 'Title',
                       hintText: 'e.g. Passport, Invoice, Certificate',
                       prefixIcon: Icon(Icons.title),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       filled: true,
                       fillColor: Theme.of(context).colorScheme.surface,
                     ),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 14),
                   Row(
@@ -145,7 +174,9 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                             labelText: 'Tags',
                             hintText: 'e.g. work, personal, tax',
                             prefixIcon: Icon(Icons.label),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                             filled: true,
                             fillColor: Theme.of(context).colorScheme.surface,
                           ),
@@ -158,15 +189,29 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                           decoration: InputDecoration(
                             labelText: 'Folder',
                             prefixIcon: Icon(Icons.folder),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                             filled: true,
                             fillColor: Theme.of(context).colorScheme.surface,
                           ),
                           items: [
-                            DropdownMenuItem(value: 'General', child: Text('General')),
-                            DropdownMenuItem(value: 'Work', child: Text('Work')),
-                            DropdownMenuItem(value: 'Personal', child: Text('Personal')),
-                            DropdownMenuItem(value: 'Finance', child: Text('Finance')),
+                            DropdownMenuItem(
+                              value: 'General',
+                              child: Text('General'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Work',
+                              child: Text('Work'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Personal',
+                              child: Text('Personal'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Finance',
+                              child: Text('Finance'),
+                            ),
                           ],
                           onChanged: (value) {},
                         ),
@@ -179,7 +224,9 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                       labelText: 'Description / Notes',
                       hintText: 'Add details or notes about this document',
                       prefixIcon: Icon(Icons.description),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       filled: true,
                       fillColor: Theme.of(context).colorScheme.surface,
                     ),
@@ -194,20 +241,31 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {},
-                    icon: Icon(Icons.save, color: Theme.of(context).colorScheme.primary, size: 26),
+                    icon: Icon(
+                      Icons.save,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 26,
+                    ),
                     label: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Text('Save Changes',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                          letterSpacing: 0.2,
-                        ),
+                      child: Text(
+                        'Save Changes',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                              letterSpacing: 0.2,
+                            ),
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       backgroundColor: Theme.of(context).colorScheme.surface,
                       shadowColor: Colors.black.withOpacity(0.08),
                       elevation: 2,
@@ -219,20 +277,31 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: () {},
-                    icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.primary, size: 26),
+                    icon: Icon(
+                      Icons.delete,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 26,
+                    ),
                     label: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Text('Delete',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                          letterSpacing: 0.2,
-                        ),
+                      child: Text(
+                        'Delete',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                              letterSpacing: 0.2,
+                            ),
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       backgroundColor: Theme.of(context).colorScheme.surface,
                       shadowColor: Colors.black.withOpacity(0.08),
                       elevation: 2,
