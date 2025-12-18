@@ -25,10 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleLogin() {
     if (_formKey.currentState!.validate()) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const EditDocumentPage()),
-      );
+      Navigator.pushReplacementNamed(context, '/home');
     }
   }
 
