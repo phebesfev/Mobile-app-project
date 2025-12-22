@@ -7,7 +7,7 @@ It enhances productivity by converting paper documents into searchable, shareabl
 
 🎯 Objectives
 
-Digitize documents quickly and accurately.
+Digitize documents quickly and accurately..
 
 Organize files using folders and tags.
 
