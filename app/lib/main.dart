@@ -1,3 +1,4 @@
+import 'package:app/screens/home/home_screen.dart';
 import 'package:app/screens/home/initial_screen.dart';
 import 'package:flutter/material.dart';
 import 'theme/app_theme.dart';
@@ -16,8 +17,9 @@ class QuickScanApp extends StatelessWidget {
       title: 'Quick Scan',
       debugShowCheckedModeBanner: false, // Removes the "Debug" banner
       theme: AppTheme.lightTheme, // Apply our custom professional theme
-      home: const InitialScreen(), // Start at Login for now
-      // home: const LoginScreen(),
+      // home: const LoginScreen(),// Start at Login for now
+      // home: const InitialScreen(),
+      home: const HomeScreen(),
     );
   }
 }
