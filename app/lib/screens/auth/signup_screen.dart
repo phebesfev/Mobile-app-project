@@ -1,147 +1,65 @@
 import 'package:flutter/material.dart';
 
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+class EditDocumentPage extends StatefulWidget {
+  const EditDocumentPage({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  State<EditDocumentPage> createState() => _EditDocumentPageState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
-  bool _isRepeatPasswordVisible = false;
-  bool _isPasswordVisible = false;
+class _EditDocumentPageState extends State<EditDocumentPage> {
+  final _titleController = TextEditingController();
+  final _tagsController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  String? _selectedFolder;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _tagsController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text('Edit Document')),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(24),
+        padding: const EdgeInsets.all(18),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              'Sign up',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 35,
-              ),
-              textAlign: TextAlign.center,
+            TextFormField(
+              controller: _titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
             ),
-            SizedBox(height: 8),
-            Text(
-              'Create an account',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.grey,
-                fontSize: 16,
-              ),
-              textAlign: TextAlign.center,
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _tagsController,
+              decoration: const InputDecoration(labelText: 'Tags'),
             ),
-            SizedBox(height: 24),
-            Form(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Full name',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      hintText: 'Enter your full name',
-                      prefixIcon: Icon(Icons.person),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Email',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      hintText: 'Enter your email',
-                      prefixIcon: Icon(Icons.email),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Create a username',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      hintText: 'username',
-                      prefixIcon: Icon(Icons.person_outline),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Password',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  TextFormField(
-                    obscureText: !_isPasswordVisible,
-                    decoration: InputDecoration(
-                      hintText: '***********',
-                      prefixIcon: Icon(Icons.vpn_key),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isPasswordVisible
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 24),
-                  Text(
-                    'Repeat password',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  TextFormField(
-                    obscureText: !_isRepeatPasswordVisible,
-                    decoration: InputDecoration(
-                      hintText: '***********',
-                      prefixIcon: Icon(Icons.vpn_key),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _isRepeatPasswordVisible
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _isRepeatPasswordVisible = !_isRepeatPasswordVisible;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 24),
-                ],
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: _selectedFolder,
+              items: const [
+                DropdownMenuItem(value: 'General', child: Text('General')),
+                DropdownMenuItem(value: 'Work', child: Text('Work')),
+                DropdownMenuItem(value: 'Personal', child: Text('Personal')),
+                DropdownMenuItem(value: 'Finance', child: Text('Finance')),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedFolder = value;
+                });
+              },
+              decoration: const InputDecoration(labelText: 'Folder'),
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _descriptionController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Description / Notes',
               ),
             ),
           ],
