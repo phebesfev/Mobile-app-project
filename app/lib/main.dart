@@ -4,8 +4,11 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'theme/app_theme.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
+import 'screens/home/initial_screen.dart';
 import 'screens/scan/scan_screen.dart';
 import 'screens/scan/edit.dart';
+import 'screens/files/search_screen.dart';
+import 'screens/profile/settings_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,8 +37,8 @@ class QuickScanApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Quick Scan',
-      debugShowCheckedModeBanner: false, //
-      theme: AppTheme.lightTheme, //
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.lightTheme,
       home: const LoginScreen(),
       routes: {
         '/home': (context) => const HomeScreen(),
