@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/firestore_service.dart';
 
 class EditDocumentPage extends StatefulWidget {
   const EditDocumentPage({super.key});
@@ -13,6 +15,11 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
   final _descriptionController = TextEditingController();
   String? _selectedFolder;
 
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  final FirestoreService _firestoreService = FirestoreService();
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -21,49 +28,86 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
     super.dispose();
   }
 
+  Future<void> _saveDocument() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final docId = _titleController.text
+          .trim()
+          .replaceAll(' ', '_')
+          .toLowerCase();
+
+      await _firestoreService.setDocument(
+        collection: 'documents',
+        docId: docId,
+        data: {
+          'title': _titleController.text.trim(),
+          'tags': _tagsController.text.trim(),
+          'folder': _selectedFolder ?? '',
+          'description': _descriptionController.text.trim(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Document saved!')));
+    } catch (e) {
+      setState(() => _errorMessage = e.toString());
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _deleteDocument() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final docId = _titleController.text
+          .trim()
+          .replaceAll(' ', '_')
+          .toLowerCase();
+
+      await _firestoreService.deleteDocument(
+        collection: 'documents',
+        docId: docId,
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Document deleted!')));
+    } catch (e) {
+      setState(() => _errorMessage = e.toString());
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Edit Document')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _tagsController,
-              decoration: const InputDecoration(labelText: 'Tags'),
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<String>(
-              value: _selectedFolder,
-              items: const [
-                DropdownMenuItem(value: 'General', child: Text('General')),
-                DropdownMenuItem(value: 'Work', child: Text('Work')),
-                DropdownMenuItem(value: 'Personal', child: Text('Personal')),
-                DropdownMenuItem(value: 'Finance', child: Text('Finance')),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _selectedFolder = value;
-                });
-              },
-              decoration: const InputDecoration(labelText: 'Folder'),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _descriptionController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Description / Notes',
-              ),
-            ),
-          ],
-        ),
+      body: Column(
+        children: [
+          ElevatedButton(
+            onPressed: _isLoading ? null : _saveDocument,
+            child: const Text('Save'),
+          ),
+          ElevatedButton(
+            onPressed: _isLoading ? null : _deleteDocument,
+            child: const Text('Delete'),
+          ),
+          if (_errorMessage != null)
+            Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+        ],
       ),
     );
   }
