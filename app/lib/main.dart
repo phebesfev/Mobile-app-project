@@ -1,5 +1,7 @@
+import 'package:app/screens/files/search_screen.dart';
 import 'package:app/screens/home/home_screen.dart';
 import 'package:app/screens/home/initial_screen.dart';
+import 'package:app/screens/profile/settings_screen.dart';
 import 'package:app/screens/scan/scan_screen.dart';
 import 'package:flutter/material.dart';
 import 'theme/app_theme.dart';
@@ -20,7 +22,7 @@ class QuickScanApp extends StatelessWidget {
       theme: AppTheme.lightTheme, // Apply our custom professional theme
       // home: const LoginScreen(),// Start at Login for now
       // home: const InitialScreen(),
-      home: const ScanScreen(),
+      home: const SearchScreen(),
     );
   }
 }
