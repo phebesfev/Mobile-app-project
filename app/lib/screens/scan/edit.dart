@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'edit_image_page.dart';
+import '../../services/firestore_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditDocumentPage extends StatefulWidget {
   const EditDocumentPage({super.key});
@@ -16,6 +18,7 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
   bool _isLoading = false;
   String? _errorMessage;
   String? _imageUrl;
+  final FirestoreService _firestoreService = FirestoreService();
 
   @override
   void dispose() {
@@ -23,6 +26,72 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
     _tagsController.dispose();
     _descriptionController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveDocument() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final docId = _titleController.text
+          .trim()
+          .replaceAll(' ', '_')
+          .toLowerCase();
+      await _firestoreService.setDocument(
+        collection: 'documents',
+        docId: docId,
+        data: {
+          'title': _titleController.text.trim(),
+          'tags': _tagsController.text.trim(),
+          'folder': _selectedFolder ?? '',
+          'description': _descriptionController.text.trim(),
+          'imageUrl': _imageUrl ?? '',
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Document saved!')));
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _deleteDocument() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final docId = _titleController.text
+          .trim()
+          .replaceAll(' ', '_')
+          .toLowerCase();
+      await _firestoreService.deleteDocument(
+        collection: 'documents',
+        docId: docId,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Document deleted!')));
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -119,6 +188,7 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                 ],
               ),
             ),
+            const SizedBox(height: 28),
           ],
         ),
       ),
