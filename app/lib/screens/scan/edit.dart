@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'edit_image_page.dart';
 import '../../services/firestore_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -286,7 +287,7 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedFolder,
+                          initialValue: _selectedFolder,
                           decoration: InputDecoration(
                             labelText: 'Folder',
                             prefixIcon: Icon(Icons.folder),
