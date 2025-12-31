@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import '../../services/storage_service.dart';
 
 class EditImagePage extends StatefulWidget {
@@ -16,6 +18,44 @@ class _EditImagePageState extends State<EditImagePage> {
   bool _isLoading = false;
   String? _errorMessage;
   final StorageService _storageService = StorageService();
+
+  Future<void> _pickImage(ImageSource source) async {
+    final picked = await ImagePicker().pickImage(source: source);
+    if (picked != null) {
+      setState(() {
+        _imageFile = File(picked.path);
+      });
+    }
+  }
+
+  Future<void> _cropImage() async {
+    if (_imageFile == null) return;
+    final imageCropper = ImageCropper();
+    final cropped = await imageCropper.cropImage(
+      sourcePath: _imageFile!.path,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Image',
+          toolbarColor: Theme.of(context).colorScheme.primary,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.original,
+          lockAspectRatio: false,
+        ),
+        IOSUiSettings(title: 'Crop Image'),
+      ],
+    );
+    if (cropped != null) {
+      setState(() {
+        _imageFile = File(cropped.path);
+      });
+    }
+  }
+
+  Future<void> _rotateImage() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Image rotation is not supported yet.')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +82,21 @@ class _EditImagePageState extends State<EditImagePage> {
                 padding: const EdgeInsets.all(12),
                 child: SizedBox(
                   height: 220,
-                  child: widget.image != null
+                  child: _imageFile != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: ColorFiltered(
+                            colorFilter: ColorFilter.matrix(
+                              _brightnessMatrix(_brightness),
+                            ),
+                            child: Image.file(
+                              _imageFile!,
+                              fit: BoxFit.contain,
+                              width: double.infinity,
+                            ),
+                          ),
+                        )
+                      : widget.image != null
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(14),
                           child: ColorFiltered(
@@ -65,6 +119,38 @@ class _EditImagePageState extends State<EditImagePage> {
                         ),
                 ),
               ),
+            ),
+            const SizedBox(height: 18),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => _pickImage(ImageSource.gallery),
+                  icon: const Icon(Icons.photo_library),
+                  label: const Text('Gallery'),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _pickImage(ImageSource.camera),
+                  icon: const Icon(Icons.camera_alt),
+                  label: const Text('Camera'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _cropImage,
+                  icon: const Icon(Icons.crop),
+                  label: const Text('Crop'),
+                ),
+                OutlinedButton.icon(
+                  onPressed: _rotateImage,
+                  icon: const Icon(Icons.rotate_right),
+                  label: const Text('Rotate'),
+                ),
+              ],
             ),
           ],
         ),
