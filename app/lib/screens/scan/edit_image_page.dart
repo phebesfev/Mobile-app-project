@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import '../../services/storage_service.dart';
 
 class EditImagePage extends StatefulWidget {
   final ImageProvider? image;
@@ -10,6 +12,10 @@ class EditImagePage extends StatefulWidget {
 
 class _EditImagePageState extends State<EditImagePage> {
   double _brightness = 0.0; // 0 = normal, -1 = dark, 1 = bright
+  File? _imageFile;
+  bool _isLoading = false;
+  String? _errorMessage;
+  final StorageService _storageService = StorageService();
 
   @override
   Widget build(BuildContext context) {
@@ -60,203 +66,12 @@ class _EditImagePageState extends State<EditImagePage> {
                 ),
               ),
             ),
-            const SizedBox(height: 18),
-            Text(
-              'Adjustments',
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.brightness_6,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                Expanded(
-                  child: Slider(
-                    value: _brightness,
-                    min: -1.0,
-                    max: 1.0,
-                    divisions: 20,
-                    label: _brightness == 0
-                        ? 'Normal'
-                        : _brightness > 0
-                        ? 'Bright'
-                        : 'Dark',
-                    onChanged: (value) {
-                      setState(() {
-                        _brightness = value;
-                      });
-                    },
-                  ),
-                ),
-                Text(
-                  'Brightness',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
-            Text(
-              'Image Actions',
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Add pick image logic
-                  },
-                  icon: const Icon(Icons.photo_library),
-                  label: const Text('Gallery'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // TODO: Add take photo logic
-                  },
-                  icon: const Icon(Icons.camera_alt),
-                  label: const Text('Camera'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () {
-                    // TODO: Add crop/rotate logic
-                  },
-                  icon: const Icon(Icons.crop),
-                  label: const Text('Crop'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    // TODO: Add rotate logic
-                  },
-                  icon: const Icon(Icons.rotate_right),
-                  label: const Text('Rotate'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      // TODO: Save/confirm changes
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(
-                      Icons.save,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 26,
-                    ),
-                    label: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Text(
-                        'Save Changes',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                              letterSpacing: 0.2,
-                            ),
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      shadowColor: Colors.black.withOpacity(0.08),
-                      elevation: 2,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(
-                      Icons.close,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 26,
-                    ),
-                    label: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Text(
-                        'Cancel',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                              letterSpacing: 0.2,
-                            ),
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      shadowColor: Colors.black.withOpacity(0.08),
-                      elevation: 2,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),
     );
   }
 
-  // Helper to create a color matrix for brightness
   List<double> _brightnessMatrix(double brightness) {
     return [
       1,
