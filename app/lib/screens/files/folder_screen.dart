@@ -1,16 +1,23 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../../services/firestore_service.dart';
 import '../../services/image_storage_service.dart';
 import '../edit_document_page.dart';
 
-class DocumentsScreen extends StatefulWidget {
-  const DocumentsScreen({super.key});
+class FolderScreen extends StatefulWidget {
+  final String folderName;
+
+  const FolderScreen({
+    super.key,
+    required this.folderName,
+  });
 
   @override
-  State<DocumentsScreen> createState() => _DocumentsScreenState();
+  State<FolderScreen> createState() => _FolderScreenState();
 }
 
-class _DocumentsScreenState extends State<DocumentsScreen> {
+class _FolderScreenState extends State<FolderScreen> {
+  final FirestoreService _firestoreService = FirestoreService();
   final ImageStorageService _imageStorage = ImageStorageService();
   List<File> _documents = [];
   bool _isLoading = true;
@@ -18,20 +25,47 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadDocuments();
+    _loadFolderDocuments();
   }
 
-  Future<void> _loadDocuments() async {
+  Future<void> _loadFolderDocuments() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Get all documents (images + PDFs) - already sorted by date
-      final files = await _imageStorage.getAllDocuments();
+      // Get all files
+      final allFiles = await _imageStorage.getAllDocuments();
       
+      // Get documents from Firestore filtered by folder
+      final querySnapshot = await _firestoreService.getCollection('documents');
+      final Set<String> folderFilePaths = {};
+      
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>?;
+        if (data != null) {
+          final folder = data['folder'] as String? ?? 'General';
+          if (folder == widget.folderName) {
+            final filePath = data['filePath'] as String?;
+            if (filePath != null && filePath.isNotEmpty) {
+              folderFilePaths.add(filePath);
+            }
+          }
+        }
+      }
+
+      // Filter files that belong to this folder
+      final folderFiles = allFiles.where((file) {
+        return folderFilePaths.contains(file.path);
+      }).toList();
+
+      // Sort by modification date (newest first)
+      folderFiles.sort((a, b) {
+        return b.lastModifiedSync().compareTo(a.lastModifiedSync());
+      });
+
       setState(() {
-        _documents = files;
+        _documents = folderFiles;
         _isLoading = false;
       });
     } catch (e) {
@@ -45,7 +79,11 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Documents'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(widget.folderName),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),
@@ -59,7 +97,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                       Icon(Icons.description, size: 64, color: Colors.grey),
                       const SizedBox(height: 16),
                       Text(
-                        'No documents yet',
+                        'No documents in "${widget.folderName}"',
                         style: TextStyle(color: Colors.grey, fontSize: 16),
                       ),
                     ],
@@ -87,9 +125,9 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                             builder: (context) => EditDocumentPage(filePath: file.path),
                           ),
                         );
-                        // Refresh documents when returning from edit page
+                        // Refresh when returning from edit page
                         if (result != null || mounted) {
-                          _loadDocuments();
+                          _loadFolderDocuments();
                         }
                       },
                       child: Container(
@@ -130,6 +168,12 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                               : Image.file(
                                   file,
                                   fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: Colors.grey.shade300,
+                                      child: const Icon(Icons.broken_image, size: 48),
+                                    );
+                                  },
                                 ),
                         ),
                       ),
@@ -139,3 +183,4 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
     );
   }
 }
+

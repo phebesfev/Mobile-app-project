@@ -31,6 +31,23 @@
 
   <title>app</title>
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Camera permissions for web -->
+  <script>
+    // Request camera permissions when page loads
+    window.addEventListener('DOMContentLoaded', function() {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(function(stream) {
+            console.log('Camera access granted');
+            stream.getTracks().forEach(track => track.stop());
+          })
+          .catch(function(err) {
+            console.log('Camera access will be requested when needed:', err);
+          });
+      }
+    });
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

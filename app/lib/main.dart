@@ -1,31 +1,35 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'theme/app_theme.dart';
-import 'screens/auth/login_screen.dart';
-import 'screens/home/home_screen.dart';
 import 'screens/home/initial_screen.dart';
+import 'screens/home/home_screen.dart';
 import 'screens/scan/scan_screen.dart';
 import 'screens/scan/edit.dart';
-import 'screens/files/search_screen.dart';
-import 'screens/profile/settings_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (kIsWeb) {
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: "AIzaSyDXssIZd3_LhRbmcqgOcaTWtG--ECF4WqA",
-        authDomain: "quick-scanner-27853.firebaseapp.com",
-        projectId: "quick-scanner-27853",
-        storageBucket: "quick-scanner-27853.appspot.com",
-        messagingSenderId: "331380527736",
-        appId: "1:331380527736:web:85259d7d5bbaa322ea138d",
-        measurementId: "G-930MJL5P8G",
-      ),
-    );
-  } else {
-    await Firebase.initializeApp();
+  await dotenv.load(fileName: ".env");
+     
+  try {
+    if (kIsWeb) {
+      await Firebase.initializeApp(
+        options: FirebaseOptions(
+          apiKey: dotenv.env['FIREBASE_API_KEY']!,
+          authDomain: dotenv.env['FIREBASE_AUTH_DOMAIN']!,
+          projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
+          storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET']!,
+          messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
+          appId: dotenv.env['FIREBASE_APP_ID']!,
+          measurementId: dotenv.env['FIREBASE_MEASUREMENT_ID']!,
+        ),
+      );
+    } else {
+      await Firebase.initializeApp();
+    }
+  } catch (e) {
+    debugPrint('Firebase initialization error: $e');
   }
   runApp(const QuickScanApp());
 }
@@ -39,8 +43,9 @@ class QuickScanApp extends StatelessWidget {
       title: 'Quick Scan',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const LoginScreen(),
+      initialRoute: '/',
       routes: {
+        '/': (context) => const InitialScreen(),
         '/home': (context) => const HomeScreen(),
         '/scan': (context) => const ScanScreen(),
         '/edit': (context) => const EditDocumentPage(),

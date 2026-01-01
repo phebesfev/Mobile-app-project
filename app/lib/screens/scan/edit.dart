@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'edit_image_page.dart';
+import '../../services/firestore_service.dart';
 
 class EditDocumentPage extends StatefulWidget {
   const EditDocumentPage({super.key});
@@ -9,6 +11,95 @@ class EditDocumentPage extends StatefulWidget {
 }
 
 class _EditDocumentPageState extends State<EditDocumentPage> {
+  final _titleController = TextEditingController();
+  final _tagsController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  String? _selectedFolder;
+  bool _isLoading = false;
+  String? _errorMessage;
+  String? _imageUrl;
+  final FirestoreService _firestoreService = FirestoreService();
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _tagsController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveDocument() async {
+    // Validate title
+    if (_titleController.text.trim().isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter a title';
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a title'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final docId = _titleController.text
+          .trim()
+          .replaceAll(' ', '_')
+          .toLowerCase();
+      
+      await _firestoreService.setDocument(
+        collection: 'documents',
+        docId: docId,
+        data: {
+          'title': _titleController.text.trim(),
+          'tags': _tagsController.text.trim(),
+          'folder': _selectedFolder ?? 'General',
+          'description': _descriptionController.text.trim(),
+          'imageUrl': _imageUrl ?? '',
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Document saved successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Optionally navigate back after saving
+      Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      
+      setState(() {
+        _errorMessage = e.toString();
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error saving document: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,13 +158,18 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                   SizedBox(
                     width: MediaQuery.of(context).size.width * 0.7,
                     child: OutlinedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
+                      onPressed: () async {
+                        final url = await Navigator.push<String>(
                           context,
                           MaterialPageRoute(
                             builder: (context) => const EditImagePage(),
                           ),
                         );
+                        if (url != null && mounted) {
+                          setState(() {
+                            _imageUrl = url;
+                          });
+                        }
                       },
                       icon: Icon(
                         Icons.edit,
@@ -151,6 +247,7 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                   ),
                   const SizedBox(height: 18),
                   TextFormField(
+                    controller: _titleController,
                     decoration: InputDecoration(
                       labelText: 'Title',
                       hintText: 'e.g. Passport, Invoice, Certificate',
@@ -170,6 +267,7 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                     children: [
                       Expanded(
                         child: TextFormField(
+                          controller: _tagsController,
                           decoration: InputDecoration(
                             labelText: 'Tags',
                             hintText: 'e.g. work, personal, tax',
@@ -186,6 +284,7 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: DropdownButtonFormField<String>(
+                          value: _selectedFolder,
                           decoration: InputDecoration(
                             labelText: 'Folder',
                             prefixIcon: Icon(Icons.folder),
@@ -213,13 +312,18 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                               child: Text('Finance'),
                             ),
                           ],
-                          onChanged: (value) {},
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedFolder = value;
+                            });
+                          },
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 14),
                   TextFormField(
+                    controller: _descriptionController,
                     decoration: InputDecoration(
                       labelText: 'Description / Notes',
                       hintText: 'Add details or notes about this document',
@@ -240,7 +344,7 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {},
+                    onPressed: _isLoading ? null : _saveDocument,
                     icon: Icon(
                       Icons.save,
                       color: Theme.of(context).colorScheme.primary,
@@ -248,15 +352,26 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                     ),
                     label: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Text(
-                        'Save Changes',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                              letterSpacing: 0.2,
+                      child: _isLoading
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              'Save Changes',
+                              style: Theme.of(context).textTheme.titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.primary,
+                                    letterSpacing: 0.2,
+                                  ),
                             ),
-                      ),
                     ),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
@@ -311,6 +426,32 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
                 ),
               ],
             ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red.shade700),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _errorMessage!,
+                        style: TextStyle(
+                          color: Colors.red.shade700,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),

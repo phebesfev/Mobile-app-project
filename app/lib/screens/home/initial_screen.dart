@@ -1,7 +1,64 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/auth_service.dart';
+import '../auth/login_screen.dart';
+import '../auth/signup_screen.dart';
 
-class InitialScreen extends StatelessWidget {
+class InitialScreen extends StatefulWidget {
   const InitialScreen({super.key});
+
+  @override
+  State<InitialScreen> createState() => _InitialScreenState();
+}
+
+class _InitialScreenState extends State<InitialScreen> {
+  final AuthService _authService = AuthService();
+  StreamSubscription<User?>? _authSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuthState();
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _checkAuthState() {
+    try {
+      // Wait longer before checking, so initial screen shows first
+      Future.delayed(Duration(seconds: 2), () {
+        if (!mounted) return;
+        
+        // Only navigate to home if user is logged in AND email is verified
+        final user = _authService.currentUser;
+        if (user != null && user.emailVerified) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      });
+
+      // Listen for auth state changes (only navigate if verified)
+      _authSubscription = _authService.authStateChanges.listen(
+        (User? user) {
+          // Only navigate if user exists AND email is verified
+          if (user != null && user.emailVerified && mounted) {
+            Navigator.pushReplacementNamed(context, '/home');
+          }
+        },
+        onError: (error) {
+          debugPrint('Auth state error: $error');
+          // Continue showing the initial screen even if auth fails
+        },
+      );
+    } catch (e) {
+      debugPrint('Error checking auth state: $e');
+      // Continue showing the initial screen even if auth check fails
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,8 +159,14 @@ class InitialScreen extends StatelessWidget {
                     child: SizedBox(
                       height: 65,
                       child: ElevatedButton(
-                        
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginScreen(),
+                            ),
+                          );
+                        },
                         child: const Text('Login'),
                       ),
                     ),
@@ -113,7 +176,14 @@ class InitialScreen extends StatelessWidget {
                     child: SizedBox(
                       height: 65,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SignupScreen(),
+                            ),
+                          );
+                        },
                         child: const Text('join now'),
                       ),
                     ),
@@ -121,9 +191,21 @@ class InitialScreen extends StatelessWidget {
                 ],
               ),
 
-              // 5th child:coninue
+              // 5th child:continue as guest
               SizedBox(height: 30),
-              Center(child: Text('continue as a guest')),
+              TextButton(
+                onPressed: () {
+                  // Allow user to continue without logging in
+                  Navigator.pushReplacementNamed(context, '/home');
+                },
+                child: Text(
+                  'Continue as a guest',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

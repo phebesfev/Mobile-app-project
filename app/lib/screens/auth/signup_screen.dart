@@ -1,92 +1,114 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/auth_service.dart';
 
-import 'edit_image_page.dart';
-import '../../services/firestore_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
-class EditDocumentPage extends StatefulWidget {
-  const EditDocumentPage({super.key});
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<EditDocumentPage> createState() => _EditDocumentPageState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _EditDocumentPageState extends State<EditDocumentPage> {
-  final _titleController = TextEditingController();
-  final _tagsController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  String? _selectedFolder;
+class _SignupScreenState extends State<SignupScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
   String? _errorMessage;
-  String? _imageUrl;
-  final FirestoreService _firestoreService = FirestoreService();
+  final AuthService _authService = AuthService();
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _tagsController.dispose();
-    _descriptionController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _saveDocument() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-    try {
-      final docId = _titleController.text
-          .trim()
-          .replaceAll(' ', '_')
-          .toLowerCase();
-      await _firestoreService.setDocument(
-        collection: 'documents',
-        docId: docId,
-        data: {
-          'title': _titleController.text.trim(),
-          'tags': _tagsController.text.trim(),
-          'folder': _selectedFolder ?? '',
-          'description': _descriptionController.text.trim(),
-          'imageUrl': _imageUrl ?? '',
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
-      );
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Document saved!')));
-    } catch (e) {
+  Future<void> _handleSignup() async {
+    if (!_formKey.currentState!.validate()) return;
+    
+    if (_passwordController.text != _confirmPasswordController.text) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = 'Passwords do not match';
       });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      return;
     }
-  }
 
-  Future<void> _deleteDocument() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
+
     try {
-      final docId = _titleController.text
-          .trim()
-          .replaceAll(' ', '_')
-          .toLowerCase();
-      await _firestoreService.deleteDocument(
-        collection: 'documents',
-        docId: docId,
+      // Create user account
+      await _authService.signUpWithEmail(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
       );
+      
+      // Send verification email
+      await _authService.sendEmailVerification();
+      
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Document deleted!')));
+
+// Show a more informative dialog
+showDialog(
+  context: context,
+  barrierDismissible: false, // User must click button
+  builder: (context) => AlertDialog(
+    title: Row(
+      children: [
+        Icon(Icons.email, color: Colors.blue),
+        SizedBox(width: 8),
+        Text('Check Your Email'),
+      ],
+    ),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'We\'ve sent a verification email to:',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 8),
+        Text(
+          _emailController.text.trim(),
+          style: TextStyle(color: Colors.blue),
+        ),
+        SizedBox(height: 16),
+        Text(
+          'Please click the verification link in the email to activate your account.',
+        ),
+        SizedBox(height: 8),
+        Text(
+          'After verification, you can sign in and access all features.',
+          style: TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+      ],
+    ),
+    actions: [
+      TextButton(
+        onPressed: () {
+          Navigator.of(context).pop(); // Close dialog
+          Navigator.pop(context); // Go back to login screen
+        },
+        child: Text('Got it'),
+      ),
+    ],
+  ),
+);
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _errorMessage = e.message ?? 'An error occurred';
+      });
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = 'An error occurred: $e';
       });
     } finally {
       setState(() {
@@ -98,338 +120,173 @@ class _EditDocumentPageState extends State<EditDocumentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Icon(
-              Icons.edit_document,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 8),
-            Text('Edit Document'),
-          ],
-        ),
-      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(18),
+        padding: EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Column(
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    height: 220,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(22),
-                      border: Border.all(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withOpacity(0.13),
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.10),
-                          blurRadius: 20,
-                          offset: Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: _imageUrl != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(18),
-                            child: Image.network(
-                              _imageUrl!,
-                              fit: BoxFit.contain,
-                            ),
-                          )
-                        : Center(
-                            child: Icon(
-                              Icons.insert_drive_file,
-                              size: 100,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withOpacity(0.22),
-                            ),
-                          ),
-                  ),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    child: OutlinedButton.icon(
-                      onPressed: () async {
-                        final url = await Navigator.push<String>(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const EditImagePage(),
-                          ),
-                        );
-                        if (url != null) {
-                          setState(() {
-                            _imageUrl = url;
-                          });
-                        }
-                      },
-                      icon: Icon(
-                        Icons.edit,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 26,
-                      ),
-                      label: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Text(
-                          'Edit Image',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
-                                letterSpacing: 0.2,
-                              ),
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: Theme.of(context).colorScheme.primary,
-                          width: 2,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        backgroundColor: Theme.of(context).colorScheme.surface,
-                        shadowColor: Colors.black.withOpacity(0.08),
-                        elevation: 2,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
-                    ),
-                  ),
-                ],
+            Text(
+              'Sign Up',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                fontSize: 35,
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 28),
-            // Document details card
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 18),
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 22),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withOpacity(0.08),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
-                    blurRadius: 12,
-                    offset: Offset(0, 4),
-                  ),
-                ],
+            SizedBox(height: 8),
+            Text(
+              'Create your account',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey,
+                fontSize: 16,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Document Details',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
-                  TextFormField(
-                    controller: _titleController,
-                    decoration: InputDecoration(
-                      labelText: 'Title',
-                      hintText: 'e.g. Passport, Invoice, Certificate',
-                      prefixIcon: Icon(Icons.title),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                    ),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: _tagsController,
-                          decoration: InputDecoration(
-                            labelText: 'Tags',
-                            hintText: 'e.g. work, personal, tax',
-                            prefixIcon: Icon(Icons.label),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            filled: true,
-                            fillColor: Theme.of(context).colorScheme.surface,
-                          ),
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          initialValue: _selectedFolder,
-                          decoration: InputDecoration(
-                            labelText: 'Folder',
-                            prefixIcon: Icon(Icons.folder),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            filled: true,
-                            fillColor: Theme.of(context).colorScheme.surface,
-                          ),
-                          items: [
-                            DropdownMenuItem(
-                              value: 'General',
-                              child: Text('General'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Work',
-                              child: Text('Work'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Personal',
-                              child: Text('Personal'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'Finance',
-                              child: Text('Finance'),
-                            ),
-                          ],
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedFolder = value;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  TextFormField(
-                    controller: _descriptionController,
-                    decoration: InputDecoration(
-                      labelText: 'Description / Notes',
-                      hintText: 'Add details or notes about this document',
-                      prefixIcon: Icon(Icons.description),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                    ),
-                    maxLines: 3,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _isLoading ? null : _saveDocument,
-                    icon: Icon(
-                      Icons.save,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 26,
-                    ),
-                    label: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: _isLoading
-                          ? SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(
-                              'Save Changes',
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    letterSpacing: 0.2,
-                                  ),
-                            ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      shadowColor: Colors.black.withOpacity(0.08),
-                      elevation: 2,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: _isLoading ? null : _deleteDocument,
-                    icon: Icon(
-                      Icons.delete,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 26,
-                    ),
-                    label: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Text(
-                        'Delete',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
-                              letterSpacing: 0.2,
-                            ),
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      shadowColor: Colors.black.withOpacity(0.08),
-                      elevation: 2,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
-              ],
+              textAlign: TextAlign.center,
             ),
             if (_errorMessage != null) ...[
               SizedBox(height: 12),
-              Text(_errorMessage!, style: TextStyle(color: Colors.red)),
+              Text(
+                _errorMessage!,
+                style: TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
             ],
+            SizedBox(height: 24),
+            Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Email',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      hintText: 'Enter your email',
+                      prefixIcon: Icon(Icons.email),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return 'Enter your email';
+                      if (!value.contains('@')) return 'Enter a valid email';
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Password',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: !_isPasswordVisible,
+                    decoration: InputDecoration(
+                      hintText: '***********',
+                      prefixIcon: Icon(Icons.vpn_key),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return 'Enter your password';
+                      if (value.length < 6)
+                        return 'Password must be at least 6 characters';
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Confirm Password',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: !_isConfirmPasswordVisible,
+                    decoration: InputDecoration(
+                      hintText: '***********',
+                      prefixIcon: Icon(Icons.vpn_key),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isConfirmPasswordVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                          });
+                        },
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty)
+                        return 'Confirm your password';
+                      if (value != _passwordController.text)
+                        return 'Passwords do not match';
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 24),
+                  SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _handleSignup,
+                      child: _isLoading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text(
+                              'Sign Up',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text("Already have an account? "),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Login',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

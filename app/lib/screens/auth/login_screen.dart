@@ -33,15 +33,83 @@ class _LoginScreenState extends State<LoginScreen> {
       _errorMessage = null;
     });
     try {
+      // Sign in
       await _authService.signInWithEmail(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
+      
+      // Reload user to get latest verification status
+      await _authService.reloadUser();
+      
+      // Check if email is verified
+      if (!_authService.isEmailVerified()) {
+        if (!mounted) return;
+        
+        // Sign out if not verified
+        await _authService.signOut();
+        
+        // Show verification required dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Email Not Verified'),
+            content: Text(
+              'Please verify your email address before signing in. '
+              'We\'ve sent a verification email to ${_emailController.text.trim()}. '
+              'Check your inbox and click the verification link.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  // Resend verification email
+                  try {
+                    await _authService.signInWithEmail(
+                      email: _emailController.text.trim(),
+                      password: _passwordController.text.trim(),
+                    );
+                    await _authService.sendEmailVerification();
+                    await _authService.signOut();
+                    
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Verification email resent!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Resend Email'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+      
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, '/edit');
+      Navigator.pushReplacementNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
       setState(() {
-        _errorMessage = e.message;
+        _errorMessage = e.message ?? 'An error occurred';
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An error occurred: $e';
       });
     } finally {
       setState(() {
