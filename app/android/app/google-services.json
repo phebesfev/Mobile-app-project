@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "331380527736",
+    "project_id": "quick-scanner-27853",
+    "storage_bucket": "quick-scanner-27853.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:331380527736:android:04a179699ff7bc4eea138d",
+        "android_client_info": {
+          "package_name": "com.example.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-GMRuNxicAI-Wcu_mQd0cGADKvmjJ5UM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
